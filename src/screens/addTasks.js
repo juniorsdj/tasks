@@ -17,14 +17,20 @@ import moment from 'moment'
 import 'moment'
 import commonStyles from './../commonStyles'
 
-const initialState ={
-    description: '',
-    date: new Date()
-}
 
 export default class AddTasks extends React.Component{
-    state = {...initialState}
-
+    constructor(props){
+        super(props)
+        this.state = this.getInitialState()
+    }
+    
+    
+    getInitialState = () => {
+       return{
+            description: '',
+            date: new Date()
+        } 
+    }
     save = () =>{
         if(!this.state.description.trim()){
             Alert.alert('Dados inválidos', 'Informe uma descrição para a tarefa')
@@ -35,7 +41,6 @@ export default class AddTasks extends React.Component{
 
         const data = {...this.state}
         this.props.onSave(data)
-        this.setState({...initialState})
     }
 
     renderDateAndroidChange = () => {
@@ -59,6 +64,7 @@ export default class AddTasks extends React.Component{
             visible={this.props.isVisible}
             animationType='slide'
             transparent={true}
+            onShow={() => this.setState({...this.getInitialState})}
             >
                 <TouchableWithoutFeedback onPress={this.props.onCancel}>
                     <View style={styles.offset}>

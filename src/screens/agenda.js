@@ -6,12 +6,13 @@ import { Text,
     FlatList,
     TouchableOpacity,
     Platform,
-    AsyncStorage,
  } from 'react-native'
 import moment from 'moment'
 import 'moment/locale/pt-br'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import ActionButton from 'react-native-action-button'
+import axios from 'axios'
+import {server, showError} from './../common'
 
 import todayImage from './../../assets/imgs/today.jpg'
 import commonStyles from './../commonStyles'
@@ -20,113 +21,51 @@ import AddTask from './addTasks'
 
 export default class Agenda extends React.Component {
     state ={
-        tasks:[
-            // {
-            //     id: Math.random(),
-            //     description: 'Comprar curso React',
-            //     estimateAt: new Date(),
-            //     doneAt: new Date()
-            // },
-            // {
-            //     id: Math.random(),
-            //     description: 'Concluir',
-            //     estimateAt: new Date(),
-            //     doneAt: null
-            // },
-            // {
-            //     id: Math.random(),
-            //     description: 'Comprar curso React',
-            //     estimateAt: new Date(),
-            //     doneAt: new Date()
-            // },
-            // {
-            //     id: Math.random(),
-            //     description: 'Concluir',
-            //     estimateAt: new Date(),
-            //     doneAt: null
-            // },
-            // {
-            //     id: Math.random(),
-            //     description: 'Comprar curso React',
-            //     estimateAt: new Date(),
-            //     doneAt: new Date()
-            // },
-            // {
-            //     id: Math.random(),
-            //     description: 'Concluir',
-            //     estimateAt: new Date(),
-            //     doneAt: null
-            // },
-            // {
-            //     id: Math.random(),
-            //     description: 'Comprar curso React',
-            //     estimateAt: new Date(),
-            //     doneAt: new Date()
-            // },
-            // {
-            //     id: Math.random(),
-            //     description: 'Concluir',
-            //     estimateAt: new Date(),
-            //     doneAt: null
-            // },
-            // {
-            //     id: Math.random(),
-            //     description: 'Comprar curso React',
-            //     estimateAt: new Date(),
-            //     doneAt: new Date()
-            // },
-            // {
-            //     id: Math.random(),
-            //     description: 'Concluir',
-            //     estimateAt: new Date(),
-            //     doneAt: null
-            // },
-            // {
-            //     id: Math.random(),
-            //     description: 'Comprar curso React',
-            //     estimateAt: new Date(),
-            //     doneAt: new Date()
-            // },
-            // {
-            //     id: Math.random(),
-            //     description: 'Concluir',
-            //     estimateAt: new Date(),
-            //     doneAt: null
-            // }
-        ],
+        tasks:[],
         visibleTasks: [],
         showDoneTasks: true,
         showAddTask: false,
     }
 
-    toggleFilter = () =>{
+    toggleFilter = async() =>{
         this.setState({showDoneTasks: !this.state.showDoneTasks}, this.filterTasks)
     }
 
-    deleteTask = id =>{
-        const tasks = this.state.tasks.filter(task => task.id != id)
-        this.setState({tasks}, this.filterTasks)
+    deleteTask = async id =>{
+       try {
+           await axios.delete(`${server}/tasks/${id}`)
+           await this.loadTasks()
+       } catch (err) {
+            showError(err)   
+       }
     }
 
-    addTask = task =>{
-        const tasks = [...this.state.tasks]
-        tasks.push({
-            id: Math.random(),
-            description: task.description,
-            estimateAt: task.date,
-            doneAt: null
-        })
-        this.setState({tasks,  showAddTask: false},
-            this.filterTasks
-        )
+    addTask = async task =>{
+        try {
+            await axios.post(`${server}/tasks`,{
+                description: task.description,
+                estimateAt: task.date
+
+            })
+            this.setState({showAddTask: false}, this.loadTasks)
+        } catch (err) {
+            showError(err)
+        }
     }
 
 
     componentDidMount = async () =>{
-        const data = await AsyncStorage.getItem('tasks')
-        const tasks = JSON.parse(data) || []
-        this.setState({tasks}, this.filterTasks) 
+      this.loadTasks()
    }
+    loadTasks = async () =>{
+        try {
+            const maxDate = moment().format('YYYY-MM-DD 23:59')
+            const res = await axios.get(`${server}/tasks?date=${maxDate}`)
+            this.setState({tasks: res.data}, this.filterTasks)
+        } catch (err) {
+            showError(err)
+        }
+    }
     filterTasks =() =>{
         let visibleTasks = null
         console.log('filter tasks')
@@ -137,18 +76,15 @@ export default class Agenda extends React.Component {
             visibleTasks= this.state.tasks.filter(pending)
         }
         this.setState({visibleTasks})
-        AsyncStorage.setItem('tasks', JSON.stringify(this.state.tasks))
     }
 
-    toggleTask = id =>{
-        const tasks = this.state.tasks.map(task =>{
-            if(task.id === id){
-                task = {...task}
-                task.doneAt = task.doneAt ? null : new Date() 
-            }
-            return task
-        })
-        this.setState({tasks}, this.filterTasks)
+    toggleTask = async id =>{
+        try {
+            await axios.put(`${server}/tasks/${id}/toggle`)
+            await this.loadTasks()
+        } catch (err) {
+            showError(err)
+        }
     }
 
     render() {
