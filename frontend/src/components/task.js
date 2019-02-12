@@ -15,7 +15,7 @@ import commonStyles from './../commonStyles'
 export default props =>{
     let check = null
 
-    if (props.doneAt !== null){
+    if (props.DoneAt !== null){
         check = (
             <View style={styles.done}>
                 <Icon name='check' size={20} color={commonStyles.colors.secondary}/>
@@ -28,7 +28,7 @@ export default props =>{
     }
 
 
-    const descStyle= props.doneAt !== null ? {textDecorationLine: 'line-through'} : {}
+    const descStyle= props.DoneAt !== null ? {textDecorationLine: 'line-through'} : {}
 
 
 

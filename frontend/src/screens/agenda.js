@@ -71,7 +71,7 @@ export default class Agenda extends React.Component {
         if(this.state.showDoneTasks){
             visibleTasks = [...this.state.tasks]
         }else{
-            const pending = task => task.doneAt === null
+            const pending = task => task.DoneAt === null
             visibleTasks= this.state.tasks.filter(pending)
         }
         this.setState({visibleTasks})
