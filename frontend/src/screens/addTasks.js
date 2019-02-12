@@ -79,7 +79,7 @@ export default class AddTasks extends React.Component{
                         onDateChange={date => this.setState({date})} />
                     }
                     {Platform.OS !== 'ios' && <TouchableOpacity
-                    onPress={this.handleDateAndroidChanged}
+                    onPress={this.renderDateAndroidChange}
                     >
                         <Text style={styles.date}>
                             {moment(this.state.date).format('ddd, D [de] MMMM [de] YYYY')}

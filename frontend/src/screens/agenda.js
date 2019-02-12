@@ -41,12 +41,10 @@ export default class Agenda extends React.Component {
     }
 
     addTask = async task =>{
-        console.log(task)
         try {
             await axios.post(`${server}/tasks`,{
                 description: task.description,
                 estimateAt: task.date
-
             })
             this.setState({showAddTask: false}, this.loadTasks)
         } catch (err) {
